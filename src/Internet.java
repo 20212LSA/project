@@ -189,10 +189,10 @@ public class Internet extends JFrame{
 		IPRangeComboBox.addItem("Random");
 		IPRangeComboBox.addItem("Text File");
 		JButton settingButton = new JButton();
-		settingButton.setIcon(new ImageIcon("D:\\setting.png"));
+		settingButton.setIcon(new ImageIcon("./Image/setting.png"));
 		
 		rangeStartLabel.setFont(myFont); // 폰트 크기 설정 
-		rangeStartLabel.setPreferredSize(new Dimension(90, 30));
+		rangeStartLabel.setPreferredSize(new Dimension(85, 30));
 		rangeEndLabel.setFont(myFont); // 폰트 크기 설정 
 		rangeEndLabel.setPreferredSize(new Dimension(15, 30));
 		IPRangeComboBox.setPreferredSize(new Dimension(90, 30));
@@ -220,7 +220,7 @@ public class Internet extends JFrame{
 		optionComboBox.addItem("255...0.0.0");
 		JButton startButton = new JButton("▶Start");
 		JButton MenuButton = new JButton();
-		MenuButton.setIcon(new ImageIcon("D:\\menuIM.png"));
+		MenuButton.setIcon(new ImageIcon("./Image/menu.png"));
 		
 		hostNameLabel.setFont(myFont);
 		hostNameTextfield.setPreferredSize(new Dimension(90, 30));
@@ -246,60 +246,53 @@ public class Internet extends JFrame{
 		//tool bar end
 		
 		//호스트 이름과 RANGE에 넣기 begin
-		String myIP = null;
-		String myHostname = null;
 		
+		String myIp = null;
+		String myHostname = null;
 		try {
 			InetAddress ia = InetAddress.getLocalHost();
-			
-			myIP = ia.getHostAddress();
+
+			myIp = ia.getHostAddress();
 			myHostname = ia.getHostName();
-		} catch (UnknownHostException e1) {
-			
+		} catch (Exception e) {
+
 		}
-		String fixedIP = myIP.substring(0, myIP.lastIndexOf(".") + 1);
-		rangeStartTextField.setText(fixedIP+ "1" );
-		rangeEndTextField.setText(fixedIP+ "254" );
+		String fixedIp = myIp.substring(0, myIp.lastIndexOf(".")+1);
+		rangeStartTextField.setText(fixedIp+"1");
+		rangeEndTextField.setText(fixedIp+"254");
 		hostNameTextfield.setText(myHostname);
 		
 		//호스트 이름과 RANGE에 넣기 end
-		
-		setSize(700,700);
+
+		setSize(700, 700);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);
 		
 		//start button action begin
+		
 		startButton.addActionListener(new ActionListener() {
 			
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				Pinging[] pg = new Pinging[254];
-				PortScanner[] ps = new PortScanner[254];
-				
+			public void actionPerformed(ActionEvent e) {
+				Pinging[] pi = new Pinging[254];
 				for(int i=0; i<=253; i++) {
-					pg[i] = new Pinging(fixedIP + (i+1));
-					pg[i].start();
+					pi[i] = new Pinging(fixedIp + (i+1));
+					pi[i].start();
 				}
-				for(int i =0; i<=253; i++) {
-					Object[] msg = pg[i].getMsg();
+				for(int i=0; i<=253; i++) {
+					Object[] msg = pi[i].getMsg();
+					if (msg[1] == null) {
+						msg[1] = "[n/a]";
+						msg[2] = "[n/s]";
+						msg[3] = "[n/s]";
+					} else if (msg[3] == null) {
+						msg[3] = "[n/a]";
+					} //만약 host name이 공백이다-> [n/a]로 표기
 					stats[i][0] = msg[0];
-					if(msg[1] != null) {
-						stats[i][1] = msg[1];
-					}else {
-						stats[i][1] = "[n/a]";
-					}
-					if(msg[1] != null) {
-						stats[i][2] = msg[2];
-					}else {
-						stats[i][2] = "[n/s]";
-					}
-					if(msg[1] != null) {
-						stats[i][3] = msg[3];
-					}else {
-						stats[i][3] = "[n/s]";
-					}
+					stats[i][1] = msg[1];
+					stats[i][2] = msg[2];
+					stats[i][3] = msg[3];
 				}
-				
 				//msg[1] != null || msg[2] != null || msg[3] != null
 				//portscan
 				//scan value == null -> stats[i][4] = "[n/s]"

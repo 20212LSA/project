@@ -9,7 +9,7 @@ public class Pinging extends Thread {
 
 	public Pinging(String ip) {
 		this.ip = ip;
-		msg = new Object[4];
+		msg = new Object[5];
 	}
 
 	public void run() {
@@ -28,10 +28,6 @@ public class Pinging extends Thread {
 					msg[3] = line.substring(5, line.indexOf("["));
 				}
 				if (line.indexOf("ms") >= 0) {
-					// Pattern pattern =
-					// Pattern.compile("(\\d+ms)(\\s+)(TTL=\\d+)",Pattern.CASE_INSENSTIVE);
-					// Matcher matcher = pattern.matcher(line);
-					// System.out.println(matcher.group(1));
 					msg[1] = line.substring(line.indexOf("ms") - 1, line.indexOf("ms") + 2);
 					msg[2] = line.substring(line.indexOf("TTL=") + 4, line.length());
 					break;
@@ -59,9 +55,4 @@ public class Pinging extends Thread {
 		return msg;
 	}
 	
-	public static void main(String[] args) {
-		
-		
-		
-	}
 }

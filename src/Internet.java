@@ -241,14 +241,17 @@ public class Internet extends JFrame{
 		optionComboBox.addItem("255...0.0");
 		optionComboBox.addItem("255...0.0.0");
 		JButton startButton = new JButton("▶Start");
+		JButton stopButton = new JButton("■Stop");
 		JButton MenuButton = new JButton();
 		MenuButton.setIcon(new ImageIcon("./Image/menu.png"));
+		
 
 		hostNameLabel.setFont(myFont);
 		hostNameTextfield.setPreferredSize(new Dimension(90, 30));
 		upButton.setPreferredSize(new Dimension(50, 30));
 		optionComboBox.setPreferredSize(new Dimension(90, 30));
 		startButton.setPreferredSize(new Dimension(90, 30));
+		stopButton.setPreferredSize(new Dimension(90, 30));
 		MenuButton.setFont(myFont);
 		MenuButton.setPreferredSize(new Dimension(30, 30));
 
@@ -279,6 +282,7 @@ public class Internet extends JFrame{
 		} catch (Exception e) {
 
 		}
+
 		String fixedIp = myIp.substring(0, myIp.lastIndexOf(".")+1);
 		rangeStartTextField.setText(fixedIp+"1");
 		rangeEndTextField.setText(fixedIp+"254");
@@ -296,22 +300,30 @@ public class Internet extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// ProgressBar begin
-				int a=0;
-				while(a<=100) {
-					jProgressBar.setValue(a);
-					a++;
-
-					try {
-						Thread.sleep(100);
-					}catch(Exception ae) {
-						ae.printStackTrace();
-					}
-				}
-				// ProgressBar end
 				
+				toolbar2.remove(startButton);
+				toolbar2.add(stopButton);
+				toolbar2.remove(MenuButton);
+				toolbar2.add(MenuButton);
+
 				//ip, ping, ttl, histname, port begin
 				new Thread(() -> {
+
+					// ProgressBar begin
+					int a=0;
+					while(a<=100) {
+						jProgressBar.setValue(a);
+						a++;
+						if(a==101) break;
+
+						try {
+							Thread.sleep(100);
+						}catch(Exception ae) {
+							ae.printStackTrace();
+						}
+					}
+					// ProgressBar end
+
 					Pinging[] pi = new Pinging[254];
 					for(int i=0; i<=253; i++) {
 						pi[i] = new Pinging(fixedIp + (i+1));
@@ -332,6 +344,8 @@ public class Internet extends JFrame{
 						stats[i][2] = msg[2];
 						stats[i][3] = msg[3];
 
+
+
 						if(msg[1] != null || msg[2] != null || msg[3] != null) {
 							final ExecutorService es = Executors.newFixedThreadPool(20);//20개의 풀, 스레드를 만들겠다는 이야기
 							final String ip = (String)msg[0];
@@ -348,6 +362,7 @@ public class Internet extends JFrame{
 
 								e1.printStackTrace();
 							}
+
 							int openPorts = 0;
 							String openPortNumber = "";
 							for(final Future<ScanResult>f : futures) {
@@ -374,17 +389,20 @@ public class Internet extends JFrame{
 						}	
 					}
 					jTable.repaint();
+
 				}).start();
-				
-		//ip, ping, ttl, histname, port begin
+
+				//ip, ping, ttl, histname, port begin
 			}
 		});
 		//start button action end	
+		
 	}
 	public Object[][] initTable(){ 
 		// 테이블 크기
 		Object[][] result = new Object[254][5];
 		return result;
+
 	}
 
 

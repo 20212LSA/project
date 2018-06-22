@@ -35,6 +35,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
 
 public class Internet extends JFrame{
+	static JProgressBar jProgressBar = new JProgressBar();
 
 	public Internet() {
 		//menu begin
@@ -163,20 +164,20 @@ public class Internet extends JFrame{
 		JLabel threadLabel = new JLabel("Threads: 0");
 		threadLabel.setPreferredSize(new Dimension(130,16)); // 사이즈를 늘려서 보여줌
 		threadLabel.setBorder(new BevelBorder(BevelBorder.RAISED)); // 상태바 사이의 선
-		
-		JProgressBar jProgressBar = new JProgressBar();
+
+
 		jProgressBar.setBounds(50,50,250,30);
 		jProgressBar.setValue(0);
 		jProgressBar.setStringPainted(true);
 		jProgressBar.setPreferredSize(new Dimension(145,16)); // 사이즈를 늘려서 보여줌
 		jProgressBar.setBorder(new BevelBorder(BevelBorder.RAISED)); // 상태바 사이의 선
-		
+
 		statusPanel.add(readyLabel);
 		statusPanel.add(displayLabel);
 		statusPanel.add(threadLabel); 
 		statusPanel.add(jProgressBar);//상태바 항목 붙이기
-		
-		
+
+
 		//status bar end
 
 		//table begin
@@ -201,7 +202,7 @@ public class Internet extends JFrame{
 		toolbar1.setLayout(new FlowLayout(FlowLayout.LEFT));
 		JToolBar toolbar2 = new JToolBar();
 		toolbar2.setLayout(new FlowLayout(FlowLayout.LEFT));
-		
+
 		JLabel rangeStartLabel= new JLabel("IP Range: "); //기분 툴바 만들기
 		JTextField rangeStartTextField = new JTextField(10);
 		JLabel rangeEndLabel= new JLabel("to"); 
@@ -296,74 +297,74 @@ public class Internet extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
+				jProgressupdate();
 
 				new Thread(() -> {
-				Pinging[] pi = new Pinging[254];
-				for(int i=0; i<=253; i++) {
-					pi[i] = new Pinging(fixedIp + (i+1));
-					pi[i].start();
-				}
-				for(int i=0; i<=253; i++) {
-					Object[] msg = pi[i].getMsg();
-					if (msg[1] == null) {
-						msg[1] = "[n/a]";
-						msg[2] = "[n/s]";
-						msg[3] = "[n/s]";
+					Pinging[] pi = new Pinging[254];
+					for(int i=0; i<=253; i++) {
+						pi[i] = new Pinging(fixedIp + (i+1));
+						pi[i].start();
+					}
+					for(int i=0; i<=253; i++) {
+						Object[] msg = pi[i].getMsg();
+						if (msg[1] == null) {
+							msg[1] = "[n/a]";
+							msg[2] = "[n/s]";
+							msg[3] = "[n/s]";
 
-					} else if (msg[3] == null) {
-						msg[3] = "[n/a]";
-					} //만약 host name이 공백이다-> [n/a]로 표기
-					stats[i][0] = msg[0];
-					stats[i][1] = msg[1];
-					stats[i][2] = msg[2];
-					stats[i][3] = msg[3];
+						} else if (msg[3] == null) {
+							msg[3] = "[n/a]";
+						} //만약 host name이 공백이다-> [n/a]로 표기
+						stats[i][0] = msg[0];
+						stats[i][1] = msg[1];
+						stats[i][2] = msg[2];
+						stats[i][3] = msg[3];
 
-					if(msg[1] != null || msg[2] != null || msg[3] != null) {
-						final ExecutorService es = Executors.newFixedThreadPool(20);//20개의 풀, 스레드를 만들겠다는 이야기
-						final String ip = (String)msg[0];
-						final int timeout = 20;
-						final List<Future<ScanResult>> futures = new ArrayList<>();
+						if(msg[1] != null || msg[2] != null || msg[3] != null) {
+							final ExecutorService es = Executors.newFixedThreadPool(20);//20개의 풀, 스레드를 만들겠다는 이야기
+							final String ip = (String)msg[0];
+							final int timeout = 20;
+							final List<Future<ScanResult>> futures = new ArrayList<>();
 
-						for (int port = 1; port <= 1024; port++) {
+							for (int port = 1; port <= 1024; port++) {
 
-							futures.add(portlsOpen(es, ip, port, timeout));	
-						}
-						try {
-							es.awaitTermination(200L, TimeUnit.MILLISECONDS);
-						} catch (InterruptedException e1) {
-
-							e1.printStackTrace();
-						}
-						int openPorts = 0;
-						String openPortNumber = "";
-						for(final Future<ScanResult>f : futures) {
+								futures.add(portlsOpen(es, ip, port, timeout));	
+							}
 							try {
-								if(f.get().isOpen()) {
-									openPorts++;
-									openPortNumber += f.get().getPort()+","; 
-									//포트번호를 누적해서 가지고 있어야함, 번호를 획득할 수 있는 구간
-
-								}
+								es.awaitTermination(200L, TimeUnit.MILLISECONDS);
 							} catch (InterruptedException e1) {
 
 								e1.printStackTrace();
-							} catch (ExecutionException e1) {
-
-								e1.printStackTrace();
 							}
-						}
-						if(openPortNumber != null) {
-							stats[i][4] = openPortNumber;
-							//System.out.println(openPortNumber.substring(0, openPortNumber.length()-1));
-						}else {
-							//msg[4] = "[n/s]";
-							stats[i][4] = "[n/s]";
-						}
+							int openPorts = 0;
+							String openPortNumber = "";
+							for(final Future<ScanResult>f : futures) {
+								try {
+									if(f.get().isOpen()) {
+										openPorts++;
+										openPortNumber += f.get().getPort()+","; 
+										//포트번호를 누적해서 가지고 있어야함, 번호를 획득할 수 있는 구간
+									}
+								} catch (InterruptedException e1) {
 
-					}	
-				}
-				jTable.repaint();
+									e1.printStackTrace();
+								} catch (ExecutionException e1) {
+
+									e1.printStackTrace();
+								}
+							}
+							if(openPortNumber != null) {
+								stats[i][4] = openPortNumber;
+							}else {
+								stats[i][4] = "[n/s]";
+							}
+
+						}	
+					}
+					jTable.repaint();
 				}).start();
+			
 			}
 		});
 		//start button action end	
@@ -372,6 +373,20 @@ public class Internet extends JFrame{
 		// 테이블 크기
 		Object[][] result = new Object[254][5];
 		return result;
+	}
+
+	public void jProgressupdate() {
+		int a=0;
+		while(a<=100) {
+			jProgressBar.setValue(a);
+			a++;
+
+			try {
+				Thread.sleep(100);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static Future<ScanResult>portlsOpen(final ExecutorService es, final String ip, final int port, final int timeout){
@@ -392,6 +407,9 @@ public class Internet extends JFrame{
 
 	public static void main(String[] args) {
 		Internet op = new Internet();
+		op.setVisible(true);
+		op.jProgressupdate();
+
 	}
 
 }

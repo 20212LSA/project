@@ -35,7 +35,6 @@ import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
 
 public class Internet extends JFrame{
-	static JProgressBar jProgressBar = new JProgressBar();
 
 	public Internet() {
 		//menu begin
@@ -164,7 +163,7 @@ public class Internet extends JFrame{
 		JLabel threadLabel = new JLabel("Threads: 0");
 		threadLabel.setPreferredSize(new Dimension(130,16)); // 사이즈를 늘려서 보여줌
 		threadLabel.setBorder(new BevelBorder(BevelBorder.RAISED)); // 상태바 사이의 선
-
+		JProgressBar jProgressBar = new JProgressBar();
 
 		jProgressBar.setBounds(50,50,250,30);
 		jProgressBar.setValue(0);
@@ -297,9 +296,21 @@ public class Internet extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				jProgressupdate();
+				// ProgressBar begin
+				int a=0;
+				while(a<=100) {
+					jProgressBar.setValue(a);
+					a++;
 
+					try {
+						Thread.sleep(100);
+					}catch(Exception ae) {
+						ae.printStackTrace();
+					}
+				}
+				// ProgressBar end
+				
+				//ip, ping, ttl, histname, port begin
 				new Thread(() -> {
 					Pinging[] pi = new Pinging[254];
 					for(int i=0; i<=253; i++) {
@@ -364,7 +375,8 @@ public class Internet extends JFrame{
 					}
 					jTable.repaint();
 				}).start();
-			
+				
+		//ip, ping, ttl, histname, port begin
 			}
 		});
 		//start button action end	
@@ -375,19 +387,7 @@ public class Internet extends JFrame{
 		return result;
 	}
 
-	public void jProgressupdate() {
-		int a=0;
-		while(a<=100) {
-			jProgressBar.setValue(a);
-			a++;
 
-			try {
-				Thread.sleep(100);
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	public static Future<ScanResult>portlsOpen(final ExecutorService es, final String ip, final int port, final int timeout){
 		return es.submit(new Callable<ScanResult>() { //submit은 스레드의 start와 비슷하다
@@ -407,8 +407,7 @@ public class Internet extends JFrame{
 
 	public static void main(String[] args) {
 		Internet op = new Internet();
-		op.setVisible(true);
-		op.jProgressupdate();
+
 
 	}
 

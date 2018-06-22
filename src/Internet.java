@@ -391,11 +391,24 @@ public class Internet extends JFrame{
 					jTable.repaint();
 
 				}).start();
+				
+				stopButton.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						toolbar2.remove(stopButton);
+						toolbar2.add(startButton);
+						toolbar2.remove(MenuButton);
+						toolbar2.add(MenuButton);
+					}
+				});
 
 				//ip, ping, ttl, histname, port begin
 			}
 		});
-		//start button action end	
+		//start button action end
+		
 		
 	}
 	public Object[][] initTable(){ 
